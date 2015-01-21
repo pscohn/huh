@@ -26,11 +26,15 @@ def main(query):
     if search is not None:
         main(search.group(1))
     else:
-        q = query.replace('%20',' ')
+        q = query.replace('%20',' ').replace('+', '\+').replace("'", '')
         restring = '\'\'\'' + q + '.*\n'
         textex = re.compile(restring, re.IGNORECASE)
         soup = bs4.BeautifulSoup(r)
-        result = re.search(textex, soup.text).group(0)
+        try:
+            result = re.search(textex, soup.text).group(0)
+        except AttributeError:
+            print('nothing found')
+            return
         soup = bs4.BeautifulSoup(result)
         result = soup.text
         for s in resubs:
