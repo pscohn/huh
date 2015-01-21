@@ -1,0 +1,41 @@
+#!/usr/local/bin/python3
+import sys
+import re
+import requests
+import bs4
+
+redirect = re.compile('#REDIRECT\s+?\[\[(\w+)\]\]')
+
+resubs = [
+    (re.compile('<.+?>'), ''),
+    (re.compile('{{.+?}}'), ''),
+    (re.compile('\[\[(?P<only>[\w\s]*)\]\]'), '\g<only>'),
+    (re.compile('\[\[.+?\|(?P<second>[a-zA-Z0-9 ]+?)\]\]'), '\g<second>'),
+    (re.compile('\'+'), '\''),
+        ]
+
+def main(query):
+    if query == '':
+        print('usage:\n\nhuh [query]')
+        return
+    d = {'User-Agent': 'WebAPI/pscohn@gmail.com'}
+    url = 'http://en.wikipedia.org/w/api.php?format=xml&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0' % query
+
+    r = requests.get(url).text
+    search = re.search(redirect, str(r))
+    if search is not None:
+        main(search.group(1))
+    else:
+        q = query.replace('%20',' ')
+        restring = '\'\'\'' + q + '.*\n'
+        textex = re.compile(restring, re.IGNORECASE)
+        soup = bs4.BeautifulSoup(r)
+        result = re.search(textex, soup.text).group(0)
+        soup = bs4.BeautifulSoup(result)
+        result = soup.text
+        for s in resubs:
+            result = re.sub(s[0], s[1], result)
+        print(result)
+
+if __name__ == '__main__':
+    sys.exit(main('%20'.join(sys.argv[1:])))
