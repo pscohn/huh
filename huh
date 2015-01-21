@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3
 import sys
 import re
+import textwrap
 import requests
 import bs4
 
@@ -39,7 +40,8 @@ def main(query):
         result = soup.text
         for s in resubs:
             result = re.sub(s[0], s[1], result)
-        print(result)
+        for line in textwrap.wrap(result, width=100):
+            print(line)
 
 if __name__ == '__main__':
     sys.exit(main('%20'.join(sys.argv[1:])))
