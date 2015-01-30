@@ -18,10 +18,11 @@ resubs = [
 def get_text(url):
     d = {'User-Agent': 'WebAPI/pscohn@gmail.com'}
     r = requests.get(url).text
+    return r
 
 def get_wiki_intro(query):
     url = 'http://en.wikipedia.org/w/api.php?format=xml&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0' % query
-    get_text(url)
+    r = get_text(url)
     search = re.search(redirect, str(r))
     if search is not None:
         main(search.group(1))
