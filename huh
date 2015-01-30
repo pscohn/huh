@@ -15,19 +15,18 @@ resubs = [
     (re.compile('\'+'), '\''),
         ]
 
-def main(query):
-    if query == '':
-        print('usage:\n\nhuh [query]')
-        return
+def get_text(url):
     d = {'User-Agent': 'WebAPI/pscohn@gmail.com'}
-    url = 'http://en.wikipedia.org/w/api.php?format=xml&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0' % query
-
     r = requests.get(url).text
+
+def get_wiki_intro(query):
+    url = 'http://en.wikipedia.org/w/api.php?format=xml&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0' % query
+    get_text(url)
     search = re.search(redirect, str(r))
     if search is not None:
         main(search.group(1))
     else:
-        q = query.replace('%20',' ').replace('+', '\+').replace("'", '')
+        q = query.replace('_',' ').replace('+', '\+').replace("'", '')
         restring = '\'\'\'' + q + '.*\n'
         textex = re.compile(restring, re.IGNORECASE)
         soup = bs4.BeautifulSoup(r)
@@ -43,5 +42,14 @@ def main(query):
         for line in textwrap.wrap(result, width=100):
             print(line)
 
+
+def main(query):
+    if query == '':
+        print('usage:\n\nhuh [query]')
+        return
+    else:
+        get_wiki_intro(query)
+        return
+
 if __name__ == '__main__':
-    sys.exit(main('%20'.join(sys.argv[1:])))
+    sys.exit(main('_'.join(sys.argv[1:])))
